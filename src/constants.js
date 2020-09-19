@@ -1,4 +1,5 @@
 const QUEUE = {
+  ADDRESS_PROCESSING: 'address-processing',
   BULK_INDEXING: 'bulk-indexing',
   FILL_INDEXING: 'fill-indexing',
   FILL_PROCESSING: 'fill-processing',
@@ -13,6 +14,7 @@ const JOB = {
   BULK_INDEX_TRADED_TOKENS: 'bulk-index-traded-tokens',
   BULK_UPDATE_TOKEN_METADATA: 'bulk-update-token-metadata',
   CONVERT_PROTOCOL_FEE: 'convert-protocol-fee',
+  FETCH_ADDRESS_TYPE: 'fetch-address-type',
   FETCH_FILL_STATUS: 'fetch-fill-status',
   FETCH_TOKEN_METADATA: 'fetch-token-metadata',
   INDEX_FILL: 'index-fill',
