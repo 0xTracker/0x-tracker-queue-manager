@@ -1,6 +1,7 @@
 require('dotenv-safe').config();
 
-const { createQueues, UI } = require('bull-board');
+const { router, setQueues, BullAdapter } = require('bull-board');
+const Queue = require('bull');
 const Auth0Strategy = require('passport-auth0');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -14,18 +15,17 @@ const emptyQueueRoute = require('./empty-queue-route');
 const publishJobRoute = require('./publish-job-route');
 const wrapperRoute = require('./wrapper-route');
 
-/* 
-  Configure Bull Board
-*/
-const queues = createQueues({
-  redis: {
-    host: process.env.REDIS_HOST,
-  },
-});
-
-Object.values(QUEUE).forEach(queueName => {
-  queues.add(queueName);
-});
+setQueues(
+  Object.values(QUEUE).map(queueName => {
+    return new BullAdapter(
+      new Queue(queueName, {
+        redis: {
+          host: process.env.REDIS_HOST,
+        },
+      }),
+    );
+  }),
+);
 
 /*
   Configure Passport
@@ -93,7 +93,7 @@ const requireAuthentication = (req, res, next) => {
   }
 };
 
-app.use('/queues', requireAuthentication, UI);
+app.use('/queues', requireAuthentication, router);
 app.get('/publish-job', requireAuthentication, publishJobRoute.get);
 app.post('/publish-job', requireAuthentication, publishJobRoute.post);
 app.get('/empty-queue', requireAuthentication, emptyQueueRoute.get);
