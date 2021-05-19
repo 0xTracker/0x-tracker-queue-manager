@@ -10,10 +10,6 @@ const passport = require('passport');
 const session = require('express-session');
 
 const { QUEUE } = require('./constants');
-const cleanQueueRoute = require('./clean-queue-route');
-const emptyQueueRoute = require('./empty-queue-route');
-const publishJobRoute = require('./publish-job-route');
-const wrapperRoute = require('./wrapper-route');
 
 setQueues(
   Object.values(QUEUE).map(queueName => {
@@ -93,14 +89,7 @@ const requireAuthentication = (req, res, next) => {
   }
 };
 
-app.use('/queues', requireAuthentication, router);
-app.get('/publish-job', requireAuthentication, publishJobRoute.get);
-app.post('/publish-job', requireAuthentication, publishJobRoute.post);
-app.get('/empty-queue', requireAuthentication, emptyQueueRoute.get);
-app.post('/empty-queue', requireAuthentication, emptyQueueRoute.post);
-app.get('/clean-queue', requireAuthentication, cleanQueueRoute.get);
-app.post('/clean-queue', requireAuthentication, cleanQueueRoute.post);
-app.use('/', requireAuthentication, wrapperRoute);
+app.use('/', requireAuthentication, router);
 
 app.listen(process.env.PORT || 3002);
 
