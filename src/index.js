@@ -1,6 +1,8 @@
 require('dotenv-safe').config();
 
-const { router, setQueues, BullAdapter } = require('bull-board');
+const { createBullBoard } = require('@bull-board/api');
+const { BullAdapter } = require('@bull-board/api/bullAdapter');
+const { ExpressAdapter } = require('@bull-board/express');
 const Queue = require('bull');
 const Auth0Strategy = require('passport-auth0');
 const bodyParser = require('body-parser');
@@ -11,17 +13,20 @@ const session = require('express-session');
 
 const { QUEUE } = require('./constants');
 
-setQueues(
-  Object.values(QUEUE).map(queueName => {
-    return new BullAdapter(
-      new Queue(queueName, {
-        redis: {
-          host: process.env.REDIS_HOST,
-        },
-      }),
-    );
-  }),
-);
+const serverAdapter = new ExpressAdapter();
+
+const queues = Object.values(QUEUE).map(queueName => {
+  return new Queue(queueName, {
+    redis: {
+      host: process.env.REDIS_HOST,
+    },
+  });
+});
+
+createBullBoard({
+  queues: queues.map(queue => new BullAdapter(queue)),
+  serverAdapter,
+});
 
 /*
   Configure Passport
@@ -89,7 +94,7 @@ const requireAuthentication = (req, res, next) => {
   }
 };
 
-app.use('/', requireAuthentication, router);
+app.use('/', requireAuthentication, serverAdapter.getRouter());
 
 app.listen(process.env.PORT || 3002);
 
